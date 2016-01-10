@@ -1,7 +1,7 @@
 vorbis-go
 =========
 
-The package provides Go bindings for Xiph Vorbis Ogg encoder/decoder reference implementation.<br />
+The package provides Go bindings for OggVorbis encoder/decoder reference implementation from [Xiph.org](https://www.xiph.org).<br />
 All the binding code has automatically been generated with rules defined in [vorbis.yml](/vorbis.yml).
 
 ### Usage
