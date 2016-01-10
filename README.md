@@ -20,7 +20,7 @@ Examples of usage: an implemented [OggVorbis decoder](/decoder) for Go programmi
 There is a player implemented in Go that can read OggVorbis files and play them via [portaudio-go](https://github.com/xlab/portaudio-go). So you will need to get portaudio installed first.
 
 ```
-$ brew install portaudio
+$ brew install portaudio vorbis ogg
 $ go get github.com/xlab/vorbis-go/cmd/vorbis-player
 
 $ vorbis-player http://dl.xlab.is/music/ogg/cloud_passade_3.ogg
