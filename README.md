@@ -1,3 +1,5 @@
+![vorbis](https://xiph.org/images/logos/fish_xiph_org.png)
+
 vorbis-go
 =========
 
