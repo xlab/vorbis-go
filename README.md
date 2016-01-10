@@ -1,6 +1,4 @@
-![vorbis](https://xiph.org/images/logos/fish_xiph_org.png)
-
-vorbis-go
+vorbis-go ![vorbis](https://xiph.org/images/logos/fish_xiph_org.png)
 =========
 
 The package provides Go bindings for OggVorbis encoder/decoder reference implementation from [Xiph.org](https://www.xiph.org).<br />
