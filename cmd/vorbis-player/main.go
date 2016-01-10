@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -22,8 +24,8 @@ const (
 )
 
 var (
-	app      = cli.App("vorbis-player", "A player implemented in Go that can read OggVorbis files and play using PortAudio.")
-	filename = app.StringArg("FILENAME", "", "An .ogg Vorbis file to play.")
+	app = cli.App("vorbis-player", "A player implemented in Go that can read OggVorbis files and play using PortAudio.")
+	uri = app.StringArg("URI", "", "A local .ogg Vorbis file or an URL pointing to file.")
 )
 
 func main() {
@@ -46,15 +48,29 @@ func appRun() {
 			log.Println("PortAudio term error:", paErrorText(err))
 		}
 	})
-	f, err := os.Open(*filename)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	closer.Bind(func() {
-		f.Close()
-	})
 
-	dec, err := decoder.New(f, samplesPerChannel)
+	var input io.Reader
+	if strings.HasPrefix(*uri, "http://") || strings.HasPrefix(*uri, "https://") {
+		resp, err := http.Get(*uri)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		closer.Bind(func() {
+			resp.Body.Close()
+		})
+		input = resp.Body
+	} else {
+		f, err := os.Open(*uri)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		closer.Bind(func() {
+			f.Close()
+		})
+		input = f
+	}
+
+	dec, err := decoder.New(input, samplesPerChannel)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -64,7 +80,7 @@ func appRun() {
 	log.Println(fileInfoTable(info))
 
 	dec.SetErrorHandler(func(err error) {
-		log.Println("[ERR]:", err)
+		log.Println("[WARN]", err)
 	})
 	go func() {
 		dec.Decode()

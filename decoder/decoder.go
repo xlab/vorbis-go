@@ -184,7 +184,7 @@ func (d *Decoder) readStreamHeaders(r io.Reader) error {
 
 	// Read the first page
 	if ret := vorbis.OggSyncPageout(&d.syncState, &d.page); ret != 1 {
-		return errors.New("not a valid Ogg bitstream")
+		return errors.New("vorbis: not a valid Ogg bitstream")
 	}
 
 	// Init the logical bitstream with serial number stored in the page
@@ -195,15 +195,15 @@ func (d *Decoder) readStreamHeaders(r io.Reader) error {
 
 	// Add a complete page to the bitstream
 	if ret := vorbis.OggStreamPagein(&d.streamState, &d.page); ret < 0 {
-		return errors.New("the supplied page does not belong this Vorbis stream")
+		return errors.New("vorbis: the supplied page does not belong this Vorbis stream")
 	}
 	// Get the first packet
 	if ret := vorbis.OggStreamPacketout(&d.streamState, &d.packet); ret != 1 {
-		return errors.New("unable to fetch initial Vorbis packet from the first page")
+		return errors.New("vorbis: unable to fetch initial Vorbis packet from the first page")
 	}
 	// Finally decode the header packet
 	if ret := vorbis.SynthesisHeaderin(&d.info, &d.comment, &d.packet); ret < 0 {
-		return fmt.Errorf("unable to decode the initial Vorbis header: %d", ret)
+		return fmt.Errorf("vorbis: unable to decode the initial Vorbis header: %d", ret)
 	}
 
 	var headersRead int
@@ -215,7 +215,7 @@ forPage:
 		} else if res == 0 {
 			// go get more data
 			if err := d.readChunk(r); err != nil {
-				return errors.New("got EOF while reading Vorbis headers")
+				return errors.New("vorbis: got EOF while reading Vorbis headers")
 			}
 			continue forPage
 		}
@@ -223,13 +223,13 @@ forPage:
 		vorbis.OggStreamPagein(&d.streamState, &d.page)
 		for headersRead < 2 {
 			if ret := vorbis.OggStreamPacketout(&d.streamState, &d.packet); ret < 0 {
-				return errors.New("data is missing near the secondary Vorbis header")
+				return errors.New("vorbis: data is missing near the secondary Vorbis header")
 			} else if ret == 0 {
 				// no packets left on the page, go get a new one
 				continue forPage
 			}
 			if ret := vorbis.SynthesisHeaderin(&d.info, &d.comment, &d.packet); ret < 0 {
-				return errors.New("unable to read the secondary Vorbis header")
+				return errors.New("vorbis: unable to read the secondary Vorbis header")
 			}
 			headersRead++
 		}
@@ -247,11 +247,11 @@ func (d *Decoder) Decode() error {
 	d.Lock()
 	defer d.Unlock()
 	if d.closed {
-		return errors.New("decoder has already been closed")
+		return errors.New("decoder: decoder has already been closed")
 	}
 
 	if ret := vorbis.SynthesisInit(&d.dspState, &d.info); ret < 0 {
-		err := errors.New("error during playback initialization")
+		err := errors.New("vorbis: error during playback initialization")
 		d.reportError(err)
 		return err
 	}
@@ -296,7 +296,7 @@ func (d *Decoder) sendFrame(frame [][]float32) {
 
 func (d *Decoder) readNextPage(frame *[][]float32, pcm [][][]float32) error {
 	if ret := vorbis.OggSyncPageout(&d.syncState, &d.page); ret < 0 {
-		d.onError(errors.New("corrupt or missing data in bitstream"))
+		d.onError(errors.New("vorbis: corrupt or missing data in bitstream"))
 		return nil // non-fatal
 	} else if ret == 0 {
 		// need more data
