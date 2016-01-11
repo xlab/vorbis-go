@@ -31,5 +31,8 @@ TRANSLATOR:
     private:
       - {transform: unexport}
     post-global: 
+      - {action: doc, from: "ogg_u?int[0-9]+_t"} # types like ogg_uint32_t
+      - {action: doc, from: "ogg_", to: "https://xiph.org/ogg/doc/libogg/$name.html"}
+      - {action: doc, from: "vorbis_", to: "https://xiph.org/vorbis/doc/libvorbis/$name.html"}
       - {action: replace, from: _$}
       - {load: snakecase}
