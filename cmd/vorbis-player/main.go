@@ -89,8 +89,8 @@ func appRun() {
 
 	var wg sync.WaitGroup
 	var stream *portaudio.Stream
-	callback := paCallback(&wg, info.Channels, dec.SamplesOut())
-	if err := portaudio.OpenDefaultStream(&stream, 0, info.Channels, sampleFormat, info.SampleRate,
+	callback := paCallback(&wg, int(info.Channels), dec.SamplesOut())
+	if err := portaudio.OpenDefaultStream(&stream, 0, int32(info.Channels), sampleFormat, info.SampleRate,
 		samplesPerChannel, callback, nil); paError(err) {
 		log.Fatalln("PortAudio error:", paErrorText(err))
 	}
@@ -134,11 +134,11 @@ func fileInfoTable(info decoder.Info) string {
 func paCallback(wg *sync.WaitGroup, channels int, samples <-chan [][]float32) portaudio.StreamCallback {
 	wg.Add(1)
 	return func(_ unsafe.Pointer, output unsafe.Pointer, sampleCount uint,
-		_ *portaudio.StreamCallbackTimeInfo, _ portaudio.StreamCallbackFlags, _ unsafe.Pointer) int {
+		_ *portaudio.StreamCallbackTimeInfo, _ portaudio.StreamCallbackFlags, _ unsafe.Pointer) int32 {
 
 		const (
-			statusContinue = int(portaudio.PaContinue)
-			statusComplete = int(portaudio.PaComplete)
+			statusContinue = int32(portaudio.PaContinue)
+			statusComplete = int32(portaudio.PaComplete)
 		)
 
 		frame, ok := <-samples

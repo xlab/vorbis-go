@@ -66,7 +66,7 @@ type Decoder struct {
 
 // Info represents basic information about the audio in a Vorbis bitstream.
 type Info struct {
-	Channels   int
+	Channels   int32
 	SampleRate float64
 	Comments   []string
 	Vendor     string
@@ -92,7 +92,7 @@ func New(r io.Reader, samplesPerChannel int) (*Decoder, error) {
 // Info returns some basic info about the Vorbis stream the decoder was fed with.
 func (d *Decoder) Info() Info {
 	info := Info{
-		Channels:   int(d.info.Channels),
+		Channels:   d.info.Channels,
 		SampleRate: float64(d.info.Rate),
 		Vendor:     toString(d.comment.Vendor, 256),
 	}
