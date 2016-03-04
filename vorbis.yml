@@ -12,27 +12,29 @@ PARSER:
 
 TRANSLATOR: 
   ConstRules: 
-    decl: expand
-    enum: cgo
+    defines: eval
   PtrTips:
     function:
-      - {target: vorbis_synthesis_pcmout, tips: [ref,arr]}
+      - {target: "vorbis_synthesis_pcmout$", tips: [ref,arr]}
       - {target: ^vorbis_, tips: [ref,ref,ref]}
       - {target: ^ogg_, self: arr, tips: [ref,ref]}
   Rules: 
     global: 
       - {transform: lower}
-      - {action: accept, from: "vorbis_"}
-      - {action: accept, from: "ogg_"}
+      - {action: accept, from: "^vorbis_"}
+      - {action: accept, from: "^ogg_"}
       - {action: replace, from: "^vorbis_", to: _}
       - {transform: export}
+    const:
+      - {action: accept, from: "^OV_"}
+      - {action: replace, from: "^ov_", to: _}
     type: 
       - {action: replace, from: "_t$"}
     private:
       - {transform: unexport}
     post-global: 
-      - {action: doc, from: "ogg_u?int[0-9]+_t"} # types like ogg_uint32_t
-      - {action: doc, from: "ogg_", to: "https://xiph.org/ogg/doc/libogg/$name.html"}
-      - {action: doc, from: "vorbis_", to: "https://xiph.org/vorbis/doc/libvorbis/$name.html"}
+      - {action: doc, from: "^ogg_u?int[0-9]+_t"} # types like ogg_uint32_t
+      - {action: doc, from: "^ogg_", to: "https://xiph.org/ogg/doc/libogg/$name.html"}
+      - {action: doc, from: "^vorbis_", to: "https://xiph.org/vorbis/doc/libvorbis/$name.html"}
       - {action: replace, from: _$}
       - {load: snakecase}
