@@ -169,14 +169,14 @@ func (d *Decoder) stopRequested() bool {
 }
 
 // readPage reads a page of exact size into libvorbis' Ogg layer.
-func (d *Decoder) readChunk(r io.Reader) error {
+func (d *Decoder) readChunk(r io.Reader) (n int, err error) {
 	buf := vorbis.OggSyncBuffer(&d.syncState, DATA_CHUNK_SIZE)
-	n, err := io.ReadFull(r, buf[:DATA_CHUNK_SIZE])
+	n, err = io.ReadFull(r, buf[:DATA_CHUNK_SIZE])
 	vorbis.OggSyncWrote(&d.syncState, int(n))
 	if err == io.ErrUnexpectedEOF {
-		return io.EOF
+		return n, io.EOF
 	}
-	return err
+	return n, err
 }
 
 func (d *Decoder) readStreamHeaders(r io.Reader) error {
@@ -214,7 +214,7 @@ forPage:
 			continue forPage
 		} else if res == 0 {
 			// go get more data
-			if err := d.readChunk(r); err != nil {
+			if _, err := d.readChunk(r); err != nil {
 				return errors.New("vorbis: got EOF while reading Vorbis headers")
 			}
 			continue forPage
@@ -272,10 +272,15 @@ func (d *Decoder) Decode() error {
 	}()
 
 	for !d.stopRequested() {
-		switch err := d.readNextPage(&frame, pcm); err {
+		n, err := d.readNextPage(&frame, pcm)
+		switch err {
 		case nil:
 			continue
 		case io.EOF:
+			if n > 0 {
+				// has some data on the last page
+				continue
+			}
 			return nil
 		default:
 			// a fatal error occured
@@ -294,10 +299,10 @@ func (d *Decoder) sendFrame(frame [][]float32) {
 	}
 }
 
-func (d *Decoder) readNextPage(frame *[][]float32, pcm [][][]float32) error {
+func (d *Decoder) readNextPage(frame *[][]float32, pcm [][][]float32) (n int, err error) {
 	if ret := vorbis.OggSyncPageout(&d.syncState, &d.page); ret < 0 {
 		d.onError(errors.New("vorbis: corrupt or missing data in bitstream"))
-		return nil // non-fatal
+		return 0, nil // non-fatal
 	} else if ret == 0 {
 		// need more data
 		return d.readChunk(d.input)
@@ -311,7 +316,7 @@ func (d *Decoder) readNextPage(frame *[][]float32, pcm [][][]float32) error {
 			continue // skip packet
 		} else if ret == 0 {
 			// no packets left on the page, go to the new one
-			return nil
+			return 0, nil
 		}
 		if vorbis.Synthesis(&d.block, &d.packet) == 0 {
 			vorbis.SynthesisBlockin(&d.dspState, &d.block)
@@ -337,7 +342,7 @@ func (d *Decoder) readNextPage(frame *[][]float32, pcm [][][]float32) error {
 		}
 	}
 	if d.stopRequested() || vorbis.OggPageEos(&d.page) == 1 {
-		return io.EOF
+		return 0, io.EOF
 	}
-	return nil
+	return 0, nil
 }
