@@ -91,17 +91,7 @@ func New(r io.Reader, samplesPerChannel int) (*Decoder, error) {
 
 // Info returns some basic info about the Vorbis stream the decoder was fed with.
 func (d *Decoder) Info() Info {
-	info := Info{
-		Channels:   d.info.Channels,
-		SampleRate: float64(d.info.Rate),
-		Vendor:     toString(d.comment.Vendor, 256),
-	}
-	lengths := d.comment.CommentLengths[:d.comment.Comments]
-	userComments := d.comment.UserComments[:d.comment.Comments]
-	for i, text := range userComments {
-		info.Comments = append(info.Comments, string(text[:lengths[i]]))
-	}
-	return info
+	return ReadInfo(&d.info, &d.comment)
 }
 
 // SetErrorHandler sets the callback function that will be called upon a decode error occurs.
