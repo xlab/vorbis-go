@@ -15,6 +15,7 @@ TRANSLATOR:
     defines: eval
   PtrTips:
     function:
+      - {target: "vorbis_analysis_headerout$", tips: [sref,sref,sref,sref,sref]}
       - {target: "vorbis_synthesis_pcmout$", tips: [ref,arr]}
       - {target: ^vorbis_, tips: [ref,ref,ref]}
       - {target: ^ogg_, self: arr, tips: [ref,ref]}
