@@ -7,7 +7,10 @@ GENERATOR:
   Includes: ["ogg/ogg.h", "vorbis/codec.h", "vorbis/vorbisenc.h"]
 
 PARSER: 
-  IncludePaths: ["/usr/include"]
+  IncludePaths: [
+    "/usr/include",
+    "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include",
+  ]
   SourcesPaths: ["vorbis/ogg/ogg.h", "vorbis/vorbis/codec.h", "vorbis/vorbis/vorbisenc.h"]
 
 TRANSLATOR: 
