@@ -10,10 +10,10 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/apcera/termtables"
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	"github.com/xlab/closer"
 	"github.com/xlab/portaudio-go/portaudio"
+	"github.com/xlab/termtables"
 	"github.com/xlab/vorbis-go/decoder"
 )
 
