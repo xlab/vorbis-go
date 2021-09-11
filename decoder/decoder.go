@@ -141,7 +141,7 @@ func (d *Decoder) decoderStateCleanup() {
 	vorbis.InfoClear(&d.info)
 	d.info.Free()
 
-	vorbis.OggSyncDestroy(&d.syncState)
+	vorbis.OggSyncClear(&d.syncState)
 	d.syncState.Free()
 
 	// clear up all remaining refs
